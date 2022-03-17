@@ -17,12 +17,11 @@ default_args = {
     "retry_delay": timedelta(minutes=1),
 }
 
-dag = DAG("weather", default_args=default_args, schedule_interval="0 6 * * *")
+with DAG(dag = DAG("weather", default_args=default_args, schedule_interval="0 6 * * *"))as dag:
+    t1 = PythonOperator(task_id='csv_creation_t', python_callable=csv_creation)
 
-t1 = PythonOperator(task_id='csv_creation_t', python_callable=csv_creation, dag=dag)
+    t2 = PythonOperator(task_id="table_creation_t", python_callable=table_creation)
 
-t2 = PythonOperator(task_id="table_creation_t", python_callable=table_creation, dag=dag)
+    t3 = PythonOperator(task_id="populate_table_t", python_callable=populate_table)
 
-t3 = PythonOperator(task_id="populate_table_t", python_callable=populate_table, dag=dag)
-
-t1 >> t2 >> t3
+    t1 >> t2 >> t3
